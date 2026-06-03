@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام القبول والتسجيل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --surface: #111827;
+      --card: #1a2235;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --info: #3b82f6;
+      --info-hover: #2563eb;
+      --warning: #f59e0b;
+      --warning-hover: #d97706;
+      --border: #2d3748;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 30px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* الهيدر العلوي */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 25px;
+      background-color: var(--surface);
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px solid var(--border);
+    }
+
+    header h1 { font-size: 22px; font-weight: 700; }
+    header .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    /* تقسيم الصفوف (Grid) */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* تصميم الكروت */
+    .card {
+      background-color: var(--card);
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card h2 .badge {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: normal;
+      margin-right: 5px;
+    }
+
+    /* تصميم حقول الإدخال */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--info);
+    }
+
+    /* الأزرار */
+    button {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.99); }
+
+    .btn-primary { background-color: var(--primary); }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+
+    .btn-danger { background-color: var(--danger); }
+    .btn-danger:hover { background-color: var(--danger-hover); }
+
+    .btn-info { background-color: var(--info); }
+    .btn-info:hover { background-color: var(--info-hover); }
+
+    .btn-warning { background-color: var(--warning); }
+    .btn-warning:hover { background-color: var(--warning-hover); }
+
+    /* نتائج البحث */
+    .search-result {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: var(--surface);
+      border-radius: 8px;
+      border-right: 4px solid var(--info);
+      font-size: 13.5px;
+      display: none;
+      line-height: 1.7;
+    }
+
+    /* الجدول السفلي */
+    .table-section {
+      background-color: var(--card);
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .table-section h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+    }
+
+    th {
+      background-color: var(--surface);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>نظام القبول والتسجيل 🎓</h1>
+      <p class="subtitle">Admission & Registration System (Client-Server Project)</p>
+    </div>
+    <div style="color: var(--primary); font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">● Localhost:3000</div>
+  </header>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>➕ إضافة طالب جديد <span class="badge">(INSERT)</span></h2>
+      <form id="insertForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>رقم الطالب *</label>
+            <input type="text" id="ins_id" placeholder="مثال: 2024001" required>
+          </div>
+          <div class="form-group">
+            <label>الاسم الكامل *</label>
+            <input type="text" id="ins_name" placeholder="أحمد محمد" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>التخصص *</label>
+            <select id="ins_major" required>
+              <option value="">اختر التخصص</option>
+              <option value="نظم معلومات إدارية (MIS)">نظم معلومات إدارية (MIS)</option>
+              <option value="علم حاسوب">علم حاسوب</option>
+              <option value="هندسة برمجيات">هندسة برمجيات</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>المعدل التراكمي (GPA) *</label>
+            <input type="number" id="ins_gpa" step="0.01" min="0" max="4" placeholder="3.75" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني *</label>
+          <input type="email" id="ins_email" placeholder="student@university.edu" required>
+        </div>
+        <button type="submit" class="btn-primary">➕ تسجيل الطالب الجديد</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>✏️ تعديل بيانات طالب <span class="badge">(UPDATE)</span></h2>
+      <form id="updateForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>رقم الطالب الحالي بالنظام *</label>
+            <input type="text" id="up_current_id" placeholder="الرقم الحالي للبحث" required>
+          </div>
+          <div class="form-group">
+            <label>رقم الطالب الجديد *</label>
+            <input type="text" id="up_new_id" placeholder="الرقم الجديد" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>الاسم الجديد *</label>
+            <input type="text" id="up_name" placeholder="الاسم المعدل" required>
+          </div>
+          <div class="form-group">
+            <label>التخصص الجديد *</label>
+            <select id="up_major" required>
+              <option value="">اختر التخصص الجديد</option>
+              <option value="نظم معلومات إدارية (MIS)">نظم معلومات إدارية (MIS)</option>
+              <option value="علم حاسوب">علم حاسوب</option>
+              <option value="هندسة برمجيات">هندسة برمجيات</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>المعدل الجديد *</label>
+            <input type="number" id="up_gpa" step="0.01" min="0" max="4" placeholder="المعدل" required>
+          </div>
+          <div class="form-group">
+            <label>الإيميل الجديد *</label>
+            <input type="email" id="up_email" placeholder="الإيميل المعدل" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-warning">✏️ تحديث بيانات الطالب</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div>
+        <h2>🔍 البحث عن طالب <span class="badge">(READ)</span></h2>
+        <form id="searchForm">
+          <div class="form-group">
+            <label>أدخل رقم الطالب للبحث عنه *</label>
+            <input type="text" id="search_id" placeholder="ابحث برقم الطالب..." required>
+          </div>
+          <button type="submit" class="btn-info">🔍 ابحث في قاعدة البيانات</button>
+        </form>
+      </div>
+      <div id="searchResult" class="search-result"></div>
+    </div>
+
+    <div class="card" style="justify-content: flex-start;">
+      <h2>🗑️ حذف طالب من النظام <span class="badge">(DELETE)</span></h2>
+      <form id="deleteForm">
+        <div class="form-group">
+          <label>رقم الطالب المراد حذفه نهائياً *</label>
+          <input type="text" id="del_id" placeholder="أدخل رقم الطالب لحذفه..." required>
+        </div>
+        <button type="submit" class="btn-danger">🗑️ حذف الطالب</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <h2>📋 لوحة تحكم قاعدة البيانات الحالية <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(SQLite Tables)</span></h2>
+    <table>
+      <thead>
+      <tr>
+        <th>رقم الطالب</th>
+        <th>الاسم الكامل</th>
+        <th>التخصص</th>
+        <th>المعدل (GPA)</th>
+        <th>البريد الإلكتروني</th>
+      </tr>
+      </thead>
+      <tbody id="studentsTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:3000/api/students';
+
+  // جلب وتحديث جدول الطلاب تلقائياً
+  async function loadStudents() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const tbody = document.getElementById('studentsTableBody');
+      tbody.innerHTML = '';
+
+      if(data.success && data.students.length > 0) {
+        data.students.forEach(st => {
+          tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${st.student_id}</strong></td>
+                            <td>${st.full_name}</td>
+                            <td>${st.major}</td>
+                            <td>${st.gpa}</td>
+                            <td>${st.email}</td>
+                        </tr>
+                    `;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 30px;">لا يوجد طلاب مسجلين حالياً في قاعدة البيانات.</td></tr>';
+      }
+    } catch (err) {
+      console.error("خطأ في جلب البيانات:", err);
+    }
+  }
+
+  // 1️⃣ إضافة طالب (INSERT)
+  document.getElementById('insertForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const studentData = {
+      student_id: document.getElementById('ins_id').value,
+      full_name: document.getElementById('ins_name').value,
+      major: document.getElementById('ins_major').value,
+      gpa: document.getElementById('ins_gpa').value,
+      email: document.getElementById('ins_email').value
+    };
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(studentData)
+    });
+    const data = await res.json();
+    alert(data.message);
+    if(res.ok) {
+      document.getElementById('insertForm').reset();
+      loadStudents();
+    }
+  });
+
+  // 2️⃣ تعديل طالب (UPDATE)
+  document.getElementById('updateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentId = document.getElementById('up_current_id').value;
+    const updateData = {
+      new_student_id: document.getElementById('up_new_id').value,
+      full_name: document.getElementById('up_name').value,
+      major: document.getElementById('up_major').value,
+      gpa: document.getElementById('up_gpa').value,
+      email: document.getElementById('up_email').value
+    };
+
+    const res = await fetch(`${API_URL}/${currentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData)
+    });
+    const data = await res.json();
+    alert(data.message);
+    if(res.ok) {
+      document.getElementById('updateForm').reset();
+      loadStudents();
+    }
+  });
+
+  // 3️⃣ البحث عن طالب (READ)
+  document.getElementById('searchForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('search_id').value;
+    const resultDiv = document.getElementById('searchResult');
+
+    const res = await fetch(`${API_URL}/${id}`);
+    const data = await res.json();
+
+    resultDiv.style.display = 'block';
+    if(res.ok && data.success) {
+      const st = data.student;
+      resultDiv.style.borderRightColor = 'var(--primary)';
+      resultDiv.innerHTML = `
+                <span style="color: var(--primary); font-weight: bold;">🔍 تم العثور على الطالب بنجاح:</span><br>
+                🆔 <strong>رقم الطالب:</strong> ${st.student_id} | 👤 <strong>الاسم:</strong> ${st.full_name}<br>
+                📚 <strong>التخصص:</strong> ${st.major} | 📈 <strong>المعدل:</strong> ${st.gpa}<br>
+                ✉️ <strong>البريد الإلكتروني:</strong> ${st.email}
+            `;
+    } else {
+      resultDiv.style.borderRightColor = 'var(--danger)';
+      resultDiv.innerHTML = `<span style="color: var(--danger); font-weight: bold;">❌ غير موجود:</span> الطالب غير مسجل بالنظام.`;
+    }
+  });
+
+  // 4️⃣ حذف طالب (DELETE)
+  document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('del_id').value;
+
+    const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    alert(data.message);
+    if(res.ok) {
+      document.getElementById('deleteForm').reset();
+      loadStudents();
+    }
+  });
+
+  window.onload = loadStudents;
+</script>
+
+</body>
+</html>
