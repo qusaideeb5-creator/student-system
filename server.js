@@ -20,8 +20,7 @@ app.use(express.static(__dirname));     // خدمة ملفات الـ HTML
 
 // ── إنشاء / فتح قاعدة البيانات ─────────────────────────────
 // SQLite تخزن القاعدة في ملف واحد على الجهاز
-const db = new sqlite3.Database('./registration.db', (err) => {
-    if (err) {
+const db = new sqlite3.Database(path.join(__dirname, 'registration.db'), (err) => {    if (err) {
         console.error('❌ خطأ في فتح قاعدة البيانات:', err.message);
     } else {
         console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
