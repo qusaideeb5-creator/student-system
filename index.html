@@ -44,6 +44,44 @@
       margin: 0 auto;
     }
 
+    /* شاشة تسجيل الدخول المنبثقة Overlay */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(10, 15, 30, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .login-box {
+      background-color: var(--card);
+      padding: 35px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-box h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .login-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
     /* الهيدر العلوي */
     header {
       display: flex;
@@ -107,10 +145,6 @@
 
     .form-group {
       margin-bottom: 15px;
-    }
-
-    .form-group.full-width {
-      grid-column: span 2;
     }
 
     label {
@@ -215,13 +249,31 @@
 </head>
 <body>
 
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <h3>🔐 لوحة أدمن النظام</h3>
+    <p>يرجى إدخال بيانات الاعتماد لفتح صلاحيات التحكم</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label>اسم المستخدم (Username)</label>
+        <input type="text" id="login_user" placeholder="مثال: admin" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 25px;">
+        <label>كلمة السر (Password)</label>
+        <input type="password" id="login_pass" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-info">🔓 تسجيل الدخول</button>
+    </form>
+  </div>
+</div>
+
 <div class="container">
   <header>
     <div>
       <h1>نظام القبول والتسجيل 🎓</h1>
-      <p class="subtitle">Admission & Registration System (Client-Server Project)</p>
+      <p class="subtitle">Admission & Registration System (Secure Client-Server Project)</p>
     </div>
-    <div style="color: var(--primary); font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">● Localhost:3000</div>
+    <div style="color: var(--primary); font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">● Connected to Server</div>
   </header>
 
   <div class="grid-2">
@@ -350,7 +402,36 @@
 </div>
 
 <script>
+  // مسار برمجية السيرفر النسبي ليعمل لوكال وأونلاين
   const API_URL = '/api/students';
+
+  // 🔐 معالجة وفحص تسجيل الدخول في الواجهة
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const loginData = {
+      username: document.getElementById('login_user').value,
+      password: document.getElementById('login_pass').value
+    };
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginData)
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // إذا البيانات صحيحة نخفي الشاشة المنبثقة ونشحن جدول البيانات
+        document.getElementById('loginOverlay').style.display = 'none';
+        loadStudents();
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      alert("خطأ في الاتصال بالسيرفر للمصادقة!");
+    }
+  });
 
   // جلب وتحديث جدول الطلاب تلقائياً
   async function loadStudents() {
@@ -467,8 +548,6 @@
       loadStudents();
     }
   });
-
-  window.onload = loadStudents;
 </script>
 
 </body>

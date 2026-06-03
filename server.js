@@ -20,7 +20,8 @@ app.use(express.static(__dirname));     // خدمة ملفات الـ HTML
 
 // ── إنشاء / فتح قاعدة البيانات ─────────────────────────────
 // SQLite تخزن القاعدة في ملف واحد على الجهاز
-const db = new sqlite3.Database(path.join(__dirname, 'registration.db'), (err) => {    if (err) {
+const db = new sqlite3.Database(path.join(__dirname, 'registration.db'), (err) => {
+    if (err) {
         console.error('❌ خطأ في فتح قاعدة البيانات:', err.message);
     } else {
         console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
@@ -31,13 +32,13 @@ const db = new sqlite3.Database(path.join(__dirname, 'registration.db'), (err) =
 // ── إنشاء جدول الطلاب إذا لم يكن موجوداً ──────────────────
 // هذا الجدول هو الـ Table الأساسي في قاعدة البيانات
 db.run(`
-  CREATE TABLE IF NOT EXISTS students (
-    student_id   TEXT PRIMARY KEY,   -- رقم الطالب (المفتاح الأساسي)
-    full_name    TEXT NOT NULL,       -- اسم الطالب الكامل
-    major        TEXT NOT NULL,       -- التخصص
-    gpa          REAL NOT NULL,       -- المعدل التراكمي
-    email        TEXT NOT NULL        -- البريد الإلكتروني
-  )
+    CREATE TABLE IF NOT EXISTS students (
+                                            student_id   TEXT PRIMARY KEY,   -- رقم الطالب (المفتاح الأساسي)
+                                            full_name    TEXT NOT NULL,       -- اسم الطالب الكامل
+                                            major        TEXT NOT NULL,       -- التخصص
+                                            gpa          REAL NOT NULL,       -- المعدل التراكمي
+                                            email        TEXT NOT NULL        -- البريد الإلكتروني
+    )
 `, (err) => {
     if (err) console.error('❌ خطأ في إنشاء الجدول:', err.message);
     else      console.log('✅ جدول الطلاب جاهز');
@@ -45,9 +46,22 @@ db.run(`
 
 
 // ============================================================
+//  🔐 نظام حماية تسجيل الدخول (Hardcoded Admin Auth)
+// ============================================================
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // تحديد اسم المستخدم وكلمة السر الثابتين للوحة الإدارة
+    if (username === 'admin' && password === '123456') {
+        res.json({ success: true, message: '✅ تم تسجيل الدخول بنجاح يا أدمن!' });
+    } else {
+        res.status(401).json({ success: false, message: '❌ اسم المستخدم أو كلمة السر خاطئة!' });
+    }
+});
+
+
+// ============================================================
 //  1️⃣  INSERT - إضافة طالب جديد
-//  الـ client يرسل: student_id, full_name, major, gpa, email
-//  الـ server يستقبل البيانات ويدخلها في قاعدة البيانات
 // ============================================================
 app.post('/api/students', (req, res) => {
     const { student_id, full_name, major, gpa, email } = req.body;
@@ -58,7 +72,7 @@ app.post('/api/students', (req, res) => {
     }
 
     const sql = `INSERT INTO students (student_id, full_name, major, gpa, email)
-               VALUES (?, ?, ?, ?, ?)`;
+                 VALUES (?, ?, ?, ?, ?)`;
 
     db.run(sql, [student_id, full_name, major, parseFloat(gpa), email], function (err) {
         if (err) {
@@ -75,8 +89,6 @@ app.post('/api/students', (req, res) => {
 
 // ============================================================
 //  2️⃣  DELETE - حذف طالب
-//  الـ client يرسل: student_id فقط
-//  الـ server يبحث عن الطالب ويحذفه من قاعدة البيانات
 // ============================================================
 app.delete('/api/students/:id', (req, res) => {
     const { id } = req.params;
@@ -88,7 +100,6 @@ app.delete('/api/students/:id', (req, res) => {
             return res.status(500).json({ success: false, message: 'خطأ في قاعدة البيانات' });
         }
         if (this.changes === 0) {
-            // this.changes = عدد الصفوف المتأثرة، إذا كان 0 يعني الطالب غير موجود
             return res.status(404).json({ success: false, message: 'الطالب غير موجود' });
         }
         res.json({ success: true, message: `✅ تم حذف الطالب (${id}) بنجاح` });
@@ -98,8 +109,6 @@ app.delete('/api/students/:id', (req, res) => {
 
 // ============================================================
 //  3️⃣  UPDATE - تعديل بيانات طالب
-//  الـ client يرسل: current_id (للبحث) + البيانات الجديدة
-//  الـ server يحدّث السجل في قاعدة البيانات
 // ============================================================
 app.put('/api/students/:id', (req, res) => {
     const { id } = req.params;
@@ -127,8 +136,6 @@ app.put('/api/students/:id', (req, res) => {
 
 // ============================================================
 //  4️⃣  READ - البحث عن طالب
-//  الـ client يرسل: student_id للبحث
-//  الـ server يعيد تفاصيل الطالب أو رسالة "غير موجود"
 // ============================================================
 app.get('/api/students/:id', (req, res) => {
     const { id } = req.params;
@@ -140,7 +147,6 @@ app.get('/api/students/:id', (req, res) => {
             return res.status(500).json({ success: false, message: 'خطأ في قاعدة البيانات' });
         }
         if (!row) {
-            // الطالب غير موجود في قاعدة البيانات
             return res.status(404).json({ success: false, message: 'الطالب غير موجود في النظام' });
         }
         res.json({ success: true, student: row });
@@ -160,5 +166,4 @@ app.get('/api/students', (req, res) => {
 // ── تشغيل الـ Server ────────────────────────────────────────
 app.listen(PORT, () => {
     console.log(`🚀 السيرفر يعمل على: http://localhost:${PORT}`);
-    console.log(`📂 افتح index.html في المتصفح أو http://localhost:${PORT}/index.html`);
 });
